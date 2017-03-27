@@ -1,0 +1,6 @@
+src/_log/
+src/*.cmi
+src/*.cmo
+src/run
+src/.ledit_history
+
