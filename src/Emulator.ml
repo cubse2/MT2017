@@ -245,7 +245,10 @@ struct
   let encode_with : encoding -> Band.t list -> Band.t list
   (* PROJET 2017: modifiez ce code -> *)
     = fun encoding ->
-      (fun bands -> bands)
+      let bits_to_symbol : Bits.t -> Symbol.t
+        = fun symbol -> symbol
+      in
+      (fun bands -> List.iter (fun band -> List.iter (fun symbol-> List.assoc symbol encoding ) band.right) bands)
 
 
   (* REVERSE TRANSLATION *)
