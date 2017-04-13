@@ -67,8 +67,9 @@ module State =
 
     let (to_html: Html.options -> state -> Html.content) = fun options state ->
 	  Html.cell
-	    (options @ [("align", Html.Option "center")])
-	    (to_ascii state)
+	    (options @ [("align", Html.Option "center") ;("bgcolor", Html.Color Color.red)])
+      (Html.font [("color", Html.Color Color.black)] (to_ascii state))
+	    
 
     (* user *)
 	    

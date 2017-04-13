@@ -28,9 +28,9 @@ let (int_to_rgb: int -> rgb) = fun c ->
 let (rgb_black:  rgb) = (0,0,0)
 let (rgb_blue:   rgb) = (0,0,255)
 let (rgb_cyan:   rgb) = (0,255,255)
-let (rgb_green:  rgb) = (0,255,0)
+let (rgb_green:  rgb) = (25,227,75)
 let (rgb_gray:   rgb) = (125,125,125)
-let (rgb_indigo: rgb) = (75,0,130)
+let (rgb_indigo: rgb) = (100,181,254)
 let (rgb_magenta:rgb) = (255,0,255)
 let (rgb_orange: rgb) = (229,83,0)
 let (rgb_red:    rgb) = (255,0,0)
@@ -59,16 +59,18 @@ let (color_to_rgb: color -> int * int * int) = fun color ->
 
 let (black:  color) = COL "black"
 let (white:  color) = COL "white"
-let (magenta:color) = COL "magenta"
-let (cyan:   color) = COL "cyan"
-let (blue:   color) = COL "blue"
-let (yellow: color) = COL "yellow"
-let (red:    color) = COL "red"
-let (green:  color) = COL "green"
-let (gray:   color) = RGB rgb_gray
+let (magenta:color) = COL "#9c27b0"
+let (cyan:   color) = COL "#00bcd4"
+let (blue:   color) = COL "#2196f3"
+let (yellow: color) = COL "#ffc107"
+let (red:    color) = COL "#ef5350"
+let (green:  color) = COL "#4caf50"
+let (orange:  color) = COL "#ffab40"
+let (gray:  color) = COL "#9e9e9e"
+let (indigo:  color) = COL "#3f51b5"
+(*let (gray:   color) = RGB rgb_gray
 let (orange: color) = RGB rgb_orange
-let (indigo: color) = RGB rgb_indigo
-
+let (indigo: color) = RGB rgb_indigo*)
      
 let (default:color) = black
 
@@ -87,10 +89,10 @@ let (inv_rgb_color: color -> color) = fun color ->
     
 
 let (rgb_to_string: rgb -> string) = fun (r,g,b) ->
-      String.concat "" (List.map (Pretty.Type.filled_integer 255) [r;g;b])
+      String.concat "," (List.map (Pretty.Type.filled_integer 255) [r;g;b])
 
 	  
 let (color_to_html: color -> string) = fun color ->
       match color with
-      | RGB rgb -> "#" ^ (rgb_to_string rgb)
+      | RGB rgb -> "rgb(" ^ (rgb_to_string rgb) ^ ")"
       | COL name -> name

@@ -17,7 +17,8 @@ type cells = content list
 type row = content
 type rows = row list      
 type table = content
-
+(*type styleCSS = string**)
+(*<link rel="stylesheet" type="text/css"  href="styleMT.css"/>*)
 type valeur =
   | Int of int
   | Option of string
@@ -79,6 +80,7 @@ let (environment: string * string * string -> options -> content -> content) = f
 			   content ; after_mark ;
 			   before_mark ; "</" ^ mark ^ ">" ; after_mark ]
 
+(*HEAD of HTML PAGE*)
 
 (* TABLE *)
 	
@@ -88,18 +90,18 @@ let (cell: options -> content -> cell) = environment ("  ","TD","")
     
 let (wide_cell: int -> int -> cell) = fun width n ->
       if n>0
-      then cell [ ("COLSPAN", Int n) ; ("bgcolor", Option "white") ] ""
+      then cell [ ("COLSPAN", Int n) ; ("bgcolor", Option "yellow") ] ""
       else ""
 
 let (old_wide_cell: int -> int -> cell) = fun width n ->
       if n>0
-      then (cell [("width", Int width) ; ("bgcolor", Option "orange") ] "") >> (MyList.make n) >> (String.concat "")
+      then (cell [("width", Int width) ; ("bgcolor", Option "magenta") ] "") >> (MyList.make n) >> (String.concat "")
       else ""
 
 (* table: <TABLE option> rows </TABLE> *)
 	  
 let (table: options -> rows -> table) = fun options rows ->
-      environment ("","TABLE","\n") options (concat rows)
+      environment ("","TABLE","\n") options (concat rows);;
 
 (* table row: <TR option> cells </TR> *)
 	
@@ -121,11 +123,12 @@ let (tuple: options -> cell list -> cell) = fun options cells ->
 	(table [ ("border", Int 1) ] 
 	   [row [] cells]
 	)
-	
-	
+
 (* FONT *)	  
 	  
 let (font: options -> content -> content)  = environment ("","FONT","")
+
+let (sauter_ligne: options -> content -> content) = environment("","BR","")
 
 let (italic: content -> content) = environment ("","I","") []
 

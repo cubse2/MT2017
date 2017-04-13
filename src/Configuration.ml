@@ -64,8 +64,8 @@ module Configuration =
     (* html *)
 
     let (to_html: Html.options -> configuration -> Html.table) = fun options cfg ->
-	  let tm_name = Html.cell [] cfg.tm.name
-	      
+	  let tm_name = Html.cell [("width", Html.Int 300)] cfg.tm.name
+
 	  and bands = Html.cell [] (Band.to_html_many options cfg.bands)
 
 	  and state =
@@ -76,10 +76,12 @@ module Configuration =
 		 in State.to_html [("bgcolor", Html.Color state_color)] cfg.state
     	  in
 	    Html.table
-	      (options @ [ ("bordercolor", Html.Color Color.gray) ; ("cellpadding",Html.Int 0) ; ("cellspacing",Html.Int 0) ; ("border",Html.Int 1) ])
+	      (options @ [ ("cellpadding",Html.Int 4) ; ("cellspacing",Html.Int 1) ; ("border",Html.Int 1)])
 	      [ tm_name ; state ; bands ]
-	      
-    (* user *)
+       
+
+	
+    (* user *)      
 
     let (pretty: t -> string) = fun t ->
 	  match Pretty.get_format() with

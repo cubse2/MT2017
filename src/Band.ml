@@ -34,6 +34,7 @@ type band =
 *)
   }
 
+
 module Band =
   (struct
 
@@ -128,14 +129,15 @@ module Band =
     (* html *)
 
     let (cell_to_html: band -> symbol -> Html.cell) = fun band symbol  ->
-      Symbol.to_html [ ("colspan", Html.Int band.alphabet.symbol_size_in_bits) ] symbol
+      Symbol.to_html [ ("colspan", Html.Int band.alphabet.symbol_size_in_bits)] symbol
 
 
     let (head_to_html: band -> symbol -> Html.cell) = fun band symbol ->
       Html.cell []
-        (Html.table [("bordercolor", Html.Color Color.green)]
-           [ Html.row [] [ cell_to_html band band.head ] ]
+        (Html.table [("bgcolor", Html.Color Color.indigo)]
+           [ Html.row [] [ cell_to_html band band.head] ]
         )
+
 
     let (to_html: Html.options -> band -> Html.row) = fun options band ->
       let cells =
@@ -150,7 +152,7 @@ module Band =
     let (to_html_many: Html.options -> band list -> Html.table) = fun options bands ->
       let rows = List.map (to_html []) bands in
       Html.table
-        (options @ [ ("bordercolor", Html.Color Color.white) ; ("cellpadding",Html.Int 1) ; ("cellspacing",Html.Int 0) ; ("border",Html.Int 1) ])
+        (options @ [("cellpadding",Html.Int 4) ; ("cellspacing",Html.Int 1) ; ("border-spacing", Html.Int 5) ; ("border-collapse", Html.Option ("separate"))])
         rows
 
     (* user *)
