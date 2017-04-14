@@ -59,7 +59,7 @@ let (color_to_rgb: color -> int * int * int) = fun color ->
 
 let (black:  color) = COL "black"
 let (white:  color) = COL "white"
-let (magenta:color) = COL "#9c27b0"
+let (magenta:color) = COL "#e91e63"
 let (cyan:   color) = COL "#00bcd4"
 let (blue:   color) = COL "#2196f3"
 let (yellow: color) = COL "#ffc107"
@@ -68,6 +68,8 @@ let (green:  color) = COL "#4caf50"
 let (orange:  color) = COL "#ffab40"
 let (gray:  color) = COL "#9e9e9e"
 let (indigo:  color) = COL "#3f51b5"
+let (purple_light: color) = COL "#ce93d8"
+let (purple: color) = COL "#9c27b0"
 (*let (gray:   color) = RGB rgb_gray
 let (orange: color) = RGB rgb_orange
 let (indigo: color) = RGB rgb_indigo*)

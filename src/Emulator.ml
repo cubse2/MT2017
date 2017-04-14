@@ -254,58 +254,52 @@ struct
   (* PROJET 2017: modifiez ce code -> *)
   let rec encode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
     let find : Symbol.t -> (Symbol.t * Bits.t) -> bool = fun symbol to_find -> if symbol = (Pervasives.fst to_find) then true else false in
-    let encoding_of : encoding -> Symbol.t -> Bits.t = fun encoding symbol -> Pervasives.snd (List.find (find symbol) encoding) in
-    let encode_list_with : encoding -> Symbol.t list -> Symbol.t list =
-      fun encoding symbols -> List.flatten ( List.map (encoding_of encoding) symbols) in
-    let encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
-      let head_symbols = encoding_of encoding band.head in
-        {band with
-          left  = List.rev (encode_list_with encoding (List.rev band.left));
-          head  = List.hd head_symbols;
-          right = List.tl head_symbols @ (encode_list_with encoding band.right);
-          alphabet = Alphabet.binary
-        }
-      in
-
-
-
-      match bands with
-      | h::tail -> (encode_band_with encoding h) :: encode_with encoding tail
-      | [] -> []
-
-      
-
+        let encoding_of : encoding -> Symbol.t -> Bits.t = fun encoding symbol -> Pervasives.snd (List.find (find symbol) encoding) in
+            let encode_list_with : encoding -> Symbol.t list -> Symbol.t list =
+            fun encoding symbols -> List.flatten ( List.map (encoding_of encoding) symbols) in
+                let encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
+                    let head_symbols = encoding_of encoding band.head in
+                        {band with
+                            left  = List.rev (encode_list_with encoding (List.rev band.left));
+                            head  = List.hd head_symbols;
+                            right = List.tl head_symbols @ (encode_list_with encoding band.right);
+                            alphabet = Alphabet.binary
+                        }
+                        in
+                            match bands with
+                            | h::tail -> (encode_band_with encoding h) :: encode_with encoding tail
+                            | [] -> []
 
   (* REVERSE TRANSLATION *)
 
   (** MODIFIED 27/03/2017 *)
   let rec decode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
-  let log_2 : int -> int = fun i -> Bits.nb_bits_for i in
-  let nb_bits = (log_2 (List.length encoding)) in
-  let rec nth_firsts : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then [] else List.hd liste :: nth_firsts (n-1) (List.tl liste) in
-  let rec lasts_after_nth : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then liste else lasts_after_nth (n-1) (List.tl liste) in
-  let rec extract_symbols : encoding -> symbols = fun encoding ->
-    match encoding with
-    | h::tail -> Pervasives.fst h :: extract_symbols tail
-    | [] -> []
-  in
-  let find : Bits.t -> (Symbol.t * Bits.t) -> bool = fun bits encoding -> if bits=(Pervasives.snd encoding) then true else false in
-  (* The list of decoding_of is the right length *)
-  let decoding_of : encoding -> Symbol.t list -> Symbol.t = fun encoding symbols -> Pervasives.fst (List.find (find symbols) encoding) in
-  let rec decode_list_with : encoding -> Symbol.t list -> Symbol.t list= fun encoding symbols -> if symbols=[] then [] else (decoding_of encoding (nth_firsts nb_bits symbols) :: decode_list_with encoding (lasts_after_nth nb_bits symbols)) in
-  let decode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
-  let real_head = band.head :: nth_firsts (nb_bits-1) band.right in
-  let real_right = lasts_after_nth (nb_bits-1) band.right in
-    {band with
-      left = List.rev (decode_list_with encoding (List.rev band.left));
-      head = decoding_of encoding real_head;
-      right = (decode_list_with encoding real_right);
-      alphabet = Alphabet.make (extract_symbols encoding)
-    }
-  in
-    match bands with
-    | h::tail -> (decode_band_with encoding h) :: decode_with encoding tail
-    | [] -> []
+    let log_2 : int -> int = fun i -> Bits.nb_bits_for i in
+        let nb_bits = (log_2 (List.length encoding)) in
+            let rec nth_firsts : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then [] else List.hd liste :: nth_firsts (n-1) (List.tl liste) in
+                let rec lasts_after_nth : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then liste else lasts_after_nth (n-1) (List.tl liste) in
+                    let rec extract_symbols : encoding -> symbols = fun encoding ->
+                        match encoding with
+                        | h::tail -> Pervasives.fst h :: extract_symbols tail
+                        | [] -> []
+                    in
+                        let find : Bits.t -> (Symbol.t * Bits.t) -> bool = fun bits encoding -> if bits=(Pervasives.snd encoding) then true else false in
+                        (* The list of decoding_of is the right length *)
+                            let decoding_of : encoding -> Symbol.t list -> Symbol.t = fun encoding symbols -> Pervasives.fst (List.find (find symbols) encoding) in
+                                let rec decode_list_with : encoding -> Symbol.t list -> Symbol.t list= fun encoding symbols -> if symbols=[] then [] else (decoding_of encoding (nth_firsts nb_bits symbols) :: decode_list_with encoding (lasts_after_nth nb_bits symbols)) in
+                                    let decode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
+                                        let real_head = band.head :: nth_firsts (nb_bits-1) band.right in
+                                            let real_right = lasts_after_nth (nb_bits-1) band.right in
+                                                {band with
+                                                    left = List.rev (decode_list_with encoding (List.rev band.left));
+                                                    head = decoding_of encoding real_head;
+                                                    right = (decode_list_with encoding real_right);
+                                                    alphabet = Alphabet.make (extract_symbols encoding)
+                                                }
+                                            in
+                                                match bands with
+                                                | h::tail -> (decode_band_with encoding h) :: decode_with encoding tail
+                                                | [] -> []
 
 
   (* EMULATION OF TRANSITIONS *)
@@ -349,8 +343,4 @@ let (demo: unit -> unit) = fun () ->
         (** MODIFIED 27/03/2017 *) Binary.make_simulator alphabet
       ],[])
       cfg
-  in (
-    print_string "\n\nTEST\n\n";
-    print_string (Binary.encoding_list_to_string (Binary.build_encoding alphabet)); 
-
-  )
+  in ()
