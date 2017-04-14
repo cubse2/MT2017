@@ -225,42 +225,93 @@ struct
 
   (* TRANSLATION OF BANDS *)
 
+
   (* The modules Bit and Bits are defined in Alphabet.ml *)
 
-  (** NEW 27/03/2107 *)
+  (** NEW 27/03/2017 *)
+  open Tricks
+
   type encoding = (Symbol.t * Bits.t) list
 
-  (** NEW 27/03/2107 *)
+  let rec encoding_to_string : (Symbol.t * Bits.t) -> string = fun element ->
+  match element with
+  | (s, b) -> "(" ^ Symbol.to_ascii s ^ ", " ^ (b >> Bits.pretty) ^ ")"
 
-  let build_encoding : Alphabet.t -> encoding
+  let rec encoding_list_to_string : encoding-> string = fun encodings ->
+  match encodings with
+  | [] -> ""
+  | h::t -> encoding_to_string h ^ ", " ^ encoding_list_to_string t
+
+
+
+
+  (** NEW 27/03/2017 *)
+
+  let build_encoding : Alphabet.t -> encoding = fun alphabet ->
+    List.map2 (fun symbol bits -> (symbol, bits)) alphabet.symbols (Bits.enumerate (List.length alphabet.symbols))
+   
+  (** MODIFIED 27/03/2017 *)
   (* PROJET 2017: modifiez ce code -> *)
-    = fun alphabet ->
-      let symbol_to_bits : Symbol.t -> Bits.t
-        = fun symbol -> [ Bit.zero ; Bit.unit ]
+  let rec encode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
+    let find : Symbol.t -> (Symbol.t * Bits.t) -> bool = fun symbol to_find -> if symbol = (Pervasives.fst to_find) then true else false in
+    let encoding_of : encoding -> Symbol.t -> Bits.t = fun encoding symbol -> Pervasives.snd (List.find (find symbol) encoding) in
+    let encode_list_with : encoding -> Symbol.t list -> Symbol.t list =
+      fun encoding symbols -> List.flatten ( List.map (encoding_of encoding) symbols) in
+    let encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
+      let head_symbols = encoding_of encoding band.head in
+        {band with
+          left  = List.rev (encode_list_with encoding (List.rev band.left));
+          head  = List.hd head_symbols;
+          right = List.tl head_symbols @ (encode_list_with encoding band.right);
+          alphabet = Alphabet.binary
+        }
       in
-      List.map (fun symbol -> (symbol, symbol_to_bits symbol)) alphabet.symbols
 
 
-  (** MODIFIED 27/03/2107 *)
-  let encode_with : encoding -> Band.t list -> Band.t list
-  (* PROJET 2017: modifiez ce code -> *)
-    = fun encoding ->
-      (fun bands -> bands)
+
+      match bands with
+      | h::tail -> (encode_band_with encoding h) :: encode_with encoding tail
+      | [] -> []
+
+      
 
 
   (* REVERSE TRANSLATION *)
 
-  (** MODIFIED 27/03/2107 *)
-  let decode_with : encoding -> Band.t list -> Band.t list
-  (* PROJET 2017: modifiez ce code -> *)
-    = fun encoding ->
-      (fun bands -> bands)
+  (** MODIFIED 27/03/2017 *)
+  let rec decode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
+  let log_2 : int -> int = fun i -> Bits.nb_bits_for i in
+  let nb_bits = (log_2 (List.length encoding)) in
+  let rec nth_firsts : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then [] else List.hd liste :: nth_firsts (n-1) (List.tl liste) in
+  let rec lasts_after_nth : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then liste else lasts_after_nth (n-1) (List.tl liste) in
+  let rec extract_symbols : encoding -> symbols = fun encoding ->
+    match encoding with
+    | h::tail -> Pervasives.fst h :: extract_symbols tail
+    | [] -> []
+  in
+  let find : Bits.t -> (Symbol.t * Bits.t) -> bool = fun bits encoding -> if bits=(Pervasives.snd encoding) then true else false in
+  (* The list of decoding_of is the right length *)
+  let decoding_of : encoding -> Symbol.t list -> Symbol.t = fun encoding symbols -> Pervasives.fst (List.find (find symbols) encoding) in
+  let rec decode_list_with : encoding -> Symbol.t list -> Symbol.t list= fun encoding symbols -> if symbols=[] then [] else (decoding_of encoding (nth_firsts nb_bits symbols) :: decode_list_with encoding (lasts_after_nth nb_bits symbols)) in
+  let decode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
+  let real_head = band.head :: nth_firsts (nb_bits-1) band.right in
+  let real_right = lasts_after_nth (nb_bits-1) band.right in
+    {band with
+      left = List.rev (decode_list_with encoding (List.rev band.left));
+      head = decoding_of encoding real_head;
+      right = (decode_list_with encoding real_right);
+      alphabet = Alphabet.make (extract_symbols encoding)
+    }
+  in
+    match bands with
+    | h::tail -> (decode_band_with encoding h) :: decode_with encoding tail
+    | [] -> []
 
 
   (* EMULATION OF TRANSITIONS *)
 
-  let (emulate_action: State.t * Action.t * State.t -> Turing_Machine.t)
   (* PROJET 2017: modifiez ce code -> *)
+  let (emulate_action: State.t * Action.t * State.t -> Turing_Machine.t)
     = fun (source,action,target) ->
       { Turing_Machine.nop with
         name = String.concat "" [ "Binary" ; Pretty.parentheses (Action.to_ascii action) ] ;
@@ -271,7 +322,7 @@ struct
 
   (* THE SIMULATOR *)
 
-  (** MODIFIED 27/03/2107 *)
+  (** MODIFIED 27/03/2017 *)
   let make_simulator : Alphabet.t -> simulator
     = fun alphabet ->
       let encoding = build_encoding alphabet in
@@ -283,10 +334,10 @@ struct
 
 end
 
-
 (* DEMO *)
 
 open Alphabet
+open Pretty
 
 let (demo: unit -> unit) = fun () ->
   let alphabet = Alphabet.make [B;Z;U] in
@@ -295,7 +346,11 @@ let (demo: unit -> unit) = fun () ->
   let cfg = Configuration.make tm [ band ] in
   let _final_cfg = Simulator.log_run_using
       ([ (* Split.simulator ; *)
-        (** MODIFIED 27/03/2107 *) Binary.make_simulator alphabet
+        (** MODIFIED 27/03/2017 *) Binary.make_simulator alphabet
       ],[])
       cfg
-  in ()
+  in (
+    print_string "\n\nTEST\n\n";
+    print_string (Binary.encoding_list_to_string (Binary.build_encoding alphabet)); 
+
+  )
